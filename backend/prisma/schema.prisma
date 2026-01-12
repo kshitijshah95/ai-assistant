@@ -1,12 +1,10 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  extensions = [pgvector(map: "vector")]
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -59,7 +57,6 @@ model Note {
   content   String
   category  String?
   tags      String[] @default([])
-  embedding Unsupported("vector(1536)")?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -144,12 +141,11 @@ model CalendarEvent {
 }
 
 model Category {
-  id        String                      @id @default(uuid())
-  userId    String                      @map("user_id")
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
   name      String
   type      String // 'note' | 'task' | 'goal'
-  embedding Unsupported("vector(1536)")?
-  createdAt DateTime                    @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

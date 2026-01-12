@@ -1,5 +1,4 @@
 import prisma from '../db/prisma.js';
-import { embeddingService } from './embedding.service.js';
 
 export interface CreateNoteInput {
   userId: string;
@@ -29,40 +28,20 @@ export class NotesService {
   async create(input: CreateNoteInput) {
     const { userId, title, content, category, tags } = input;
 
-    // Generate embedding for the note content
-    const textForEmbedding = `${title || ''} ${content}`.trim();
-    const embedding = await embeddingService.generateEmbedding(textForEmbedding);
-
     // Auto-categorize if no category provided
-    let finalCategory = category;
-    if (!finalCategory) {
-      finalCategory = await this.suggestCategory(userId, embedding, content);
-    }
+    const finalCategory = category || this.suggestCategory(content);
 
-    // Create note with embedding using raw SQL
-    const [note] = await prisma.$queryRaw<
-      { id: string; user_id: string; title: string | null; content: string; category: string | null; tags: string[]; created_at: Date; updated_at: Date }[]
-    >`
-      INSERT INTO notes (id, user_id, title, content, category, tags, embedding, created_at, updated_at)
-      VALUES (gen_random_uuid(), ${userId}, ${title || null}, ${content}, ${finalCategory || null}, ${tags || []}::text[], ${embedding}::vector, NOW(), NOW())
-      RETURNING id, user_id, title, content, category, tags, created_at, updated_at
-    `;
+    const note = await prisma.note.create({
+      data: {
+        userId,
+        title: title || null,
+        content,
+        category: finalCategory,
+        tags: tags || [],
+      },
+    });
 
-    // Update category embedding if we have a category
-    if (finalCategory) {
-      await embeddingService.createOrUpdateCategory(userId, finalCategory, 'note', embedding);
-    }
-
-    return {
-      id: note.id,
-      userId: note.user_id,
-      title: note.title,
-      content: note.content,
-      category: note.category,
-      tags: note.tags,
-      createdAt: note.created_at,
-      updatedAt: note.updated_at,
-    };
+    return note;
   }
 
   async update(noteId: string, userId: string, input: UpdateNoteInput) {
@@ -74,41 +53,17 @@ export class NotesService {
       throw new Error('Note not found');
     }
 
-    const content = input.content ?? existing.content;
-    const title = input.title ?? existing.title;
+    const note = await prisma.note.update({
+      where: { id: noteId },
+      data: {
+        title: input.title,
+        content: input.content,
+        category: input.category,
+        tags: input.tags,
+      },
+    });
 
-    // Regenerate embedding if content changed
-    let embedding: number[] | undefined;
-    if (input.content) {
-      const textForEmbedding = `${title || ''} ${content}`.trim();
-      embedding = await embeddingService.generateEmbedding(textForEmbedding);
-    }
-
-    if (embedding) {
-      await prisma.$executeRaw`
-        UPDATE notes 
-        SET 
-          title = ${title},
-          content = ${content},
-          category = ${input.category ?? existing.category},
-          tags = ${input.tags ?? existing.tags}::text[],
-          embedding = ${embedding}::vector,
-          updated_at = NOW()
-        WHERE id = ${noteId}
-      `;
-    } else {
-      await prisma.note.update({
-        where: { id: noteId },
-        data: {
-          title: input.title,
-          content: input.content,
-          category: input.category,
-          tags: input.tags,
-        },
-      });
-    }
-
-    return this.getById(noteId, userId);
+    return note;
   }
 
   async delete(noteId: string, userId: string) {
@@ -162,18 +117,26 @@ export class NotesService {
   }
 
   async search(userId: string, query: string, limit: number = 10) {
-    // Generate embedding for search query
-    const embedding = await embeddingService.generateEmbedding(query);
+    // Text-based search (fallback without vector search)
+    const notes = await prisma.note.findMany({
+      where: {
+        userId,
+        OR: [
+          { title: { contains: query, mode: 'insensitive' } },
+          { content: { contains: query, mode: 'insensitive' } },
+          { category: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
 
-    // Semantic search using vector similarity
-    const results = await embeddingService.findSimilarNotes(userId, embedding, limit);
-
-    return results.map((r) => ({
-      id: r.id,
-      title: r.title,
-      content: r.content,
-      category: r.category,
-      similarity: r.similarity,
+    return notes.map((n) => ({
+      id: n.id,
+      title: n.title,
+      content: n.content,
+      category: n.category,
+      similarity: 1, // No actual similarity score without vectors
     }));
   }
 
@@ -192,17 +155,7 @@ export class NotesService {
       }));
   }
 
-  private async suggestCategory(userId: string, embedding: number[], content: string): Promise<string | undefined> {
-    // Find similar categories
-    const similarCategories = await embeddingService.findSimilarCategories(userId, embedding, 'note', 3);
-
-    // If we have a highly similar category (> 0.8), use it
-    if (similarCategories.length > 0 && similarCategories[0].similarity > 0.8) {
-      return similarCategories[0].name;
-    }
-
-    // Otherwise, generate a category using content analysis
-    // For now, use simple keyword-based categorization
+  private suggestCategory(content: string): string {
     const lowercaseContent = content.toLowerCase();
 
     const categoryKeywords: Record<string, string[]> = {
