@@ -23,8 +23,8 @@ export const config = {
     defaultProvider: (process.env.DEFAULT_LLM_PROVIDER || 'openai') as 'openai' | 'anthropic',
     openai: {
       apiKey: process.env.OPENAI_API_KEY || '',
-      model: process.env.OPENAI_MODEL || 'gpt-4-turbo-preview',
-      embeddingModel: process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-ada-002',
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      embeddingModel: process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small',
     },
     anthropic: {
       apiKey: process.env.ANTHROPIC_API_KEY || '',
