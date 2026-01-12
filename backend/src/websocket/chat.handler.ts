@@ -36,7 +36,16 @@ async function handleChatMessage(socket: Socket, request: ChatRequest) {
 
   // Get or create conversation
   let convId = conversationId;
-  if (!convId) {
+  if (convId) {
+    // Verify conversation exists
+    const existingConv = await conversationService.getConversation(convId);
+    if (!existingConv) {
+      // Conversation doesn't exist, create a new one
+      const conversation = await conversationService.createConversation(userId);
+      convId = conversation.id;
+      socket.emit('chat:conversation', { conversationId: convId });
+    }
+  } else {
     const conversation = await conversationService.createConversation(userId);
     convId = conversation.id;
     socket.emit('chat:conversation', { conversationId: convId });
