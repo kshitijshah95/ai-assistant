@@ -1,4 +1,5 @@
 import prisma from '../db/prisma.js';
+import { Prisma } from '@prisma/client';
 
 export type HabitFrequency = 'daily' | 'weekly' | 'custom';
 
@@ -22,7 +23,7 @@ export class HabitsService {
         userId: input.userId,
         name: input.name,
         frequency: input.frequency || 'daily',
-        schedule: input.schedule || {},
+        schedule: (input.schedule || {}) as Prisma.InputJsonValue,
       },
     });
 
@@ -43,7 +44,7 @@ export class HabitsService {
       data: {
         name: input.name,
         frequency: input.frequency,
-        schedule: input.schedule,
+        schedule: input.schedule as Prisma.InputJsonValue | undefined,
       },
     });
 

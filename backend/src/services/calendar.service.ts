@@ -1,4 +1,5 @@
 import prisma from '../db/prisma.js';
+import { Prisma } from '@prisma/client';
 
 export interface CreateEventInput {
   userId: string;
@@ -35,7 +36,7 @@ export class CalendarService {
         startTime: input.startTime,
         endTime: input.endTime,
         recurrenceRule: input.recurrenceRule,
-        metadata: input.metadata || {},
+        metadata: (input.metadata || {}) as Prisma.InputJsonValue,
       },
     });
 
@@ -59,7 +60,7 @@ export class CalendarService {
         startTime: input.startTime,
         endTime: input.endTime,
         recurrenceRule: input.recurrenceRule,
-        metadata: input.metadata,
+        metadata: input.metadata as Prisma.InputJsonValue | undefined,
       },
     });
 

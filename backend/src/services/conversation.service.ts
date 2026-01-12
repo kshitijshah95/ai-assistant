@@ -1,4 +1,5 @@
 import prisma from '../db/prisma.js';
+import { Prisma } from '@prisma/client';
 import { ChatMessage } from '../types/index.js';
 
 export class ConversationService {
@@ -60,7 +61,7 @@ export class ConversationService {
         conversationId,
         role,
         content,
-        metadata: metadata || {},
+        metadata: (metadata || {}) as Prisma.InputJsonValue,
       },
     });
   }
