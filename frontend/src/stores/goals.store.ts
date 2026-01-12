@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 export type GoalStatus = 'active' | 'completed' | 'archived';
 
 export interface Goal {
@@ -41,7 +43,7 @@ export const useGoalsStore = create<GoalsState>((set) => ({
       const params = new URLSearchParams();
       if (status) params.set('status', status);
       
-      const response = await fetch(`/api/goals?${params}`);
+      const response = await fetch(`${API_BASE}/api/goals?${params}`);
       const goals = await response.json();
       set({ goals, isLoading: false });
     } catch (error) {
@@ -52,7 +54,7 @@ export const useGoalsStore = create<GoalsState>((set) => ({
   createGoal: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/goals', {
+      const response = await fetch(`${API_BASE}/api/goals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -72,7 +74,7 @@ export const useGoalsStore = create<GoalsState>((set) => ({
   updateGoal: async (id, data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/goals/${id}`, {
+      const response = await fetch(`${API_BASE}/api/goals/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -92,7 +94,7 @@ export const useGoalsStore = create<GoalsState>((set) => ({
   deleteGoal: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await fetch(`/api/goals/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE}/api/goals/${id}`, { method: 'DELETE' });
       set((state) => ({
         goals: state.goals.filter((g) => g.id !== id),
         selectedGoal: state.selectedGoal?.id === id ? null : state.selectedGoal,

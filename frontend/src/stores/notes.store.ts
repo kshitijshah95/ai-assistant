@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 export interface Note {
   id: string;
   title: string | null;
@@ -54,7 +56,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       const params = new URLSearchParams();
       if (category) params.set('category', category);
       
-      const response = await fetch(`/api/notes?${params}`);
+      const response = await fetch(`${API_BASE}/api/notes?${params}`);
       const data = await response.json();
       set({ notes: data.notes, isLoading: false });
     } catch (error) {
@@ -64,7 +66,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
 
   loadCategories: async () => {
     try {
-      const response = await fetch('/api/notes/categories');
+      const response = await fetch(`${API_BASE}/api/notes/categories`);
       const categories = await response.json();
       set({ categories });
     } catch (error) {
@@ -80,7 +82,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     
     set({ isLoading: true, error: null, searchQuery: query });
     try {
-      const response = await fetch('/api/notes/search', {
+      const response = await fetch(`${API_BASE}/api/notes/search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query }),
@@ -95,7 +97,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   createNote: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/notes', {
+      const response = await fetch(`${API_BASE}/api/notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -116,7 +118,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   updateNote: async (id, data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/notes/${id}`, {
+      const response = await fetch(`${API_BASE}/api/notes/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -136,7 +138,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   deleteNote: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await fetch(`/api/notes/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE}/api/notes/${id}`, { method: 'DELETE' });
       set((state) => ({
         notes: state.notes.filter((n) => n.id !== id),
         selectedNote: state.selectedNote?.id === id ? null : state.selectedNote,

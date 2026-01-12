@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
@@ -60,7 +62,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
       const params = new URLSearchParams();
       if (status) params.set('status', status);
       
-      const response = await fetch(`/api/tasks?${params}`);
+      const response = await fetch(`${API_BASE}/api/tasks?${params}`);
       const data = await response.json();
       set({ tasks: data.tasks, isLoading: false });
     } catch (error) {
@@ -70,7 +72,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
 
   loadStats: async () => {
     try {
-      const response = await fetch('/api/tasks/stats');
+      const response = await fetch(`${API_BASE}/api/tasks/stats`);
       const stats = await response.json();
       set({ stats });
     } catch (error) {
@@ -80,7 +82,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
 
   loadTodayTasks: async () => {
     try {
-      const response = await fetch('/api/tasks/today');
+      const response = await fetch(`${API_BASE}/api/tasks/today`);
       return response.json();
     } catch (error) {
       console.error('Failed to load today tasks:', error);
@@ -91,7 +93,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
   createTask: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/tasks', {
+      const response = await fetch(`${API_BASE}/api/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -112,7 +114,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
   updateTask: async (id, data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/tasks/${id}`, {
+      const response = await fetch(`${API_BASE}/api/tasks/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -132,7 +134,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
 
   completeTask: async (id) => {
     try {
-      const response = await fetch(`/api/tasks/${id}/complete`, { method: 'POST' });
+      const response = await fetch(`${API_BASE}/api/tasks/${id}/complete`, { method: 'POST' });
       const updatedTask = await response.json();
       set((state) => ({
         tasks: state.tasks.map((t) => (t.id === id ? updatedTask : t)),
@@ -147,7 +149,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
   deleteTask: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE}/api/tasks/${id}`, { method: 'DELETE' });
       set((state) => ({
         tasks: state.tasks.filter((t) => t.id !== id),
         selectedTask: state.selectedTask?.id === id ? null : state.selectedTask,

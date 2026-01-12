@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 export type HabitFrequency = 'daily' | 'weekly' | 'custom';
 
 export interface Habit {
@@ -33,7 +35,7 @@ export const useHabitsStore = create<HabitsState>((set, get) => ({
   loadHabits: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/habits');
+      const response = await fetch(`${API_BASE}/api/habits`);
       const habits = await response.json();
       set({ habits, isLoading: false });
     } catch (error) {
@@ -44,7 +46,7 @@ export const useHabitsStore = create<HabitsState>((set, get) => ({
   createHabit: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/habits', {
+      const response = await fetch(`${API_BASE}/api/habits`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -63,7 +65,7 @@ export const useHabitsStore = create<HabitsState>((set, get) => ({
 
   logHabit: async (id, notes) => {
     try {
-      await fetch(`/api/habits/${id}/log`, {
+      await fetch(`${API_BASE}/api/habits/${id}/log`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ completed: true, notes }),
@@ -79,7 +81,7 @@ export const useHabitsStore = create<HabitsState>((set, get) => ({
   deleteHabit: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await fetch(`/api/habits/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE}/api/habits/${id}`, { method: 'DELETE' });
       set((state) => ({
         habits: state.habits.filter((h) => h.id !== id),
         selectedHabit: state.selectedHabit?.id === id ? null : state.selectedHabit,

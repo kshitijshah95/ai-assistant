@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -61,7 +63,7 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
         params.set('start', currentDate.toISOString());
       }
 
-      const response = await fetch(`/api/calendar?${params}`);
+      const response = await fetch(`${API_BASE}/api/calendar?${params}`);
       const events = await response.json();
       set({ events, isLoading: false });
     } catch (error) {
@@ -72,7 +74,7 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
   createEvent: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/calendar', {
+      const response = await fetch(`${API_BASE}/api/calendar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -92,7 +94,7 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
   updateEvent: async (id, data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/calendar/${id}`, {
+      const response = await fetch(`${API_BASE}/api/calendar/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -112,7 +114,7 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
   deleteEvent: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await fetch(`/api/calendar/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE}/api/calendar/${id}`, { method: 'DELETE' });
       set((state) => ({
         events: state.events.filter((e) => e.id !== id),
         selectedEvent: state.selectedEvent?.id === id ? null : state.selectedEvent,
