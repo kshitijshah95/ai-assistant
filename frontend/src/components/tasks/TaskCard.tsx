@@ -1,7 +1,6 @@
 import { Task, TaskPriority, useTasksStore } from '@/stores/tasks.store';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { CheckCircle2, Circle, Clock, Flag, MoreVertical } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Flag } from 'lucide-react';
 
 const priorityColors: Record<TaskPriority, string> = {
   low: 'text-slate-400',

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Note, useNotesStore } from '@/stores/notes.store';
 import { Button } from '@/components/ui/button';
 import { renderMarkdown } from '@/lib/markdown';
-import { cn } from '@/lib/utils';
 import { Save, X, Trash2, Edit2, Eye } from 'lucide-react';
 
 interface NoteEditorProps {

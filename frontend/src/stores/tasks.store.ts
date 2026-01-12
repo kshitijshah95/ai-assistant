@@ -58,7 +58,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const params = new URLSearchParams();
-      if (status && status !== 'all') params.set('status', status);
+      if (status) params.set('status', status);
       
       const response = await fetch(`/api/tasks?${params}`);
       const data = await response.json();

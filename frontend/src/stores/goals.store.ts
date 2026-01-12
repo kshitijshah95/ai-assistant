@@ -28,7 +28,7 @@ interface GoalsState {
   setIsEditing: (editing: boolean) => void;
 }
 
-export const useGoalsStore = create<GoalsState>((set, get) => ({
+export const useGoalsStore = create<GoalsState>((set) => ({
   goals: [],
   isLoading: false,
   error: null,

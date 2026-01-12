@@ -4,7 +4,6 @@ import { NoteCard } from './NoteCard';
 import { NoteEditor } from './NoteEditor';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
 import { Plus, Search, FolderOpen, FileText } from 'lucide-react';
 
 export function NotesView() {
@@ -12,14 +11,12 @@ export function NotesView() {
     notes,
     categories,
     selectedCategory,
-    searchQuery,
     isLoading,
     selectedNote,
     loadNotes,
     loadCategories,
     searchNotes,
     setSelectedCategory,
-    setSearchQuery,
     setSelectedNote,
   } = useNotesStore();
 

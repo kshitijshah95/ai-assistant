@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useCalendarStore, CalendarEvent } from '@/stores/calendar.store';
+import { useCalendarStore } from '@/stores/calendar.store';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -13,7 +13,6 @@ export function CalendarView() {
     events,
     currentDate,
     view,
-    isLoading,
     selectedEvent,
     isEditing,
     loadEvents,
